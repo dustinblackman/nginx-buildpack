@@ -9,13 +9,15 @@
 # Once the dyno has is 'up' you can open your browser and navigate
 # this dyno's directory structure to download the nginx binary.
 
-NGINX_VERSION=${NGINX_VERSION-1.5.7}
+NGINX_VERSION=${NGINX_VERSION-1.11.5}
 PCRE_VERSION=${PCRE_VERSION-8.21}
-HEADERS_MORE_VERSION=${HEADERS_MORE_VERSION-0.23}
+HEADERS_MORE_VERSION=${HEADERS_MORE_VERSION-0.32}
+RTMPT_COMMIT=62130c9a89b7209842616ae8551f554347e5707d
 
 nginx_tarball_url=http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz
-pcre_tarball_url=http://garr.dl.sourceforge.net/project/pcre/pcre/${PCRE_VERSION}/pcre-${PCRE_VERSION}.tar.bz2
+pcre_tarball_url=http://pilotfiber.dl.sourceforge.net/project/pcre/pcre/${PCRE_VERSION}/pcre-${PCRE_VERSION}.tar.bz2
 headers_more_nginx_module_url=https://github.com/agentzh/headers-more-nginx-module/archive/v${HEADERS_MORE_VERSION}.tar.gz
+rtmpt_module_url=https://github.com/kwojtek/nginx-rtmpt-proxy-module/archive/${RTMPT_COMMIT}.tar.gz
 
 temp_dir=$(mktemp -d /tmp/nginx.XXXXXXXXXX)
 
@@ -35,12 +37,16 @@ echo "Downloading $pcre_tarball_url"
 echo "Downloading $headers_more_nginx_module_url"
 (cd nginx-${NGINX_VERSION} && curl -L $headers_more_nginx_module_url | tar xvz )
 
+echo "Downloading $rtmpt_module_url"
+(cd nginx-${NGINX_VERSION} && curl -L $rtmpt_module_url | tar xvz )
+
 (
 	cd nginx-${NGINX_VERSION}
 	./configure \
 		--with-pcre=pcre-${PCRE_VERSION} \
 		--prefix=/tmp/nginx \
-		--add-module=/${temp_dir}/nginx-${NGINX_VERSION}/headers-more-nginx-module-${HEADERS_MORE_VERSION}
+		--add-module=/${temp_dir}/nginx-${NGINX_VERSION}/headers-more-nginx-module-${HEADERS_MORE_VERSION} \
+    --add-module=/${temp_dir}/nginx-${NGINX_VERSION}/nginx-rtmpt-proxy-module-${RTMPT_COMMIT}
 	make install
 )
 
